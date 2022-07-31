@@ -102,6 +102,56 @@ void gamebegin(vector <string>& log, int& playersum, int& dealersum, string& pla
     cout << "Your turn now.....";
 }
 
+bool playermove(vector<string>& log, int& playersum, string& playercards, int balance[][2], bool& playerBust, int const BET, int const session) {
+    
+    char response;
+    int newcard;
+    string str;
+
+    cout << "do you want stand or hit? (h for hit / s for stand) " << endl << endl;
+    log.push_back("do you want stand or hit? (h for hit / s for stand) \n \n");
+    cin >> response;
+
+    if (response == 'h' || response == 'H') { //player wants to takeout another card
+        newcard = 1 + (rand() % 13);//generating different values using rand ranging from 0to13
+        if (newcard >= 11 && newcard <= 13)//face card. So make it 10
+            newcard = 10;
+
+        if (newcard == 1 && (playersum + 11) <= 21)//assume new card 11 if sum is less than 21, otherwise be it 1
+            newcard = 11;
+        playersum += newcard;
+        playercards = playercards + ", " + to_string(newcard);
+
+        cout << "Your cards : " << playercards << " total = " << playersum << endl;
+        str = "Your cards : " + playercards + " total = " + to_string(playersum)+" \n \n";
+        log.push_back(str);
+
+
+        if (playersum == 21) { //blackjack for player
+            cout << "Wow! you hit a blackjack.." << endl;
+            log.push_back("Wow! you hit a blackjack..\n");
+            return false;//stop game inner innerloop
+        }
+
+        if (playersum > 21) { //player is busted and dealer wins
+            cout << "You are bursted. You lose $" << BET << " to the dealer" << endl << endl;
+            str = "You are bursted. You lose $" + to_string(BET) + " to the dealer \n \n";
+            log.push_back(str);
+            balance[session][0] -= BET;
+            balance[session][1] += BET;
+            playerBust = true;
+            return false; //stop game inner loop
+
+        }
+    }//end of response if
+
+    else { //player choses to stand. No more cards
+        cout << "You chose to stand..., Now dealer will take the turn" << endl << endl;
+        log.push_back("You chose to stand..., Now dealer will take the turn \n \n");
+        return false;//stop inner loop
+    }
+
+} //end of player move function
 
 int main() {
     //variables definition
@@ -136,42 +186,8 @@ int main() {
     
     while (gamemasterloop) {
         while (gameinnerloop) { //execute player has no blackjack. loop for player to takeout more cards untill stand, burst or blackjack
-            cout << "do you want stand or hit? (h for hit / s for stand) " << endl << endl;
-            // bjfile<<"do you want stand or hit? (h for hit / s for stand) "<<endl<<endl;//writing log to file
-            cin >> response;
-
-            if (response == 'h' || response == 'H') { //player wants to takeout another card
-                newcard = 1 + (rand() % 13);//generating different values using rand ranging from 0to13
-                if (newcard >= 11 && newcard <= 13)//face card. So make it 10
-                    newcard = 10;
-
-                if (newcard == 1 && (dealersum + 11) <= 21)//assume new card 11 if sum is less than 21, otherwise be it 1
-                    newcard = 11;
-                playersum += newcard;
-                playercards = playercards + ", " + to_string(newcard);
-                cout << "Your cards : " << playercards << " total = " << playersum << endl;
-                // bjfile<<"Your cards : "<<cards<<" total = "<<sum<<endl;//writing log to file
-
-                if (playersum == 21) { //blackjack for player
-                    cout << "Wow! you hit a blackjack.." << endl;
-                    //bjfile<<"Wow! you hit a blackjack.."<<endl;//writing log to file
-                    gameinnerloop = false;
-                }
-
-                if (playersum > 21) { //player is busted and dealer wins
-                    cout << "You are bursted. You lose $" << BET << " to the dealer" << endl << endl;
-                    //bjfile<<"You are bursted. You lose $"<<BET<<" to the dealer"<<endl<<endl;//writing log to file
-                    balance[session][0]-= BET;
-                    balance[session][1] += BET;
-                    gameinnerloop = false;
-                    playerBust = true;
-                }
-            }//end of if
-            else { //player choses to stand. No more cards
-                cout << "You chose to stand..., Now dealer will take the turn" << endl << endl;
-                //bjfile<<"You chose to stand..., Now dealer will take the turn"<<endl<<endl;//writing log to file
-                gameinnerloop = false;
-            }
+            
+          
 
         }//end of innergameloop
 
