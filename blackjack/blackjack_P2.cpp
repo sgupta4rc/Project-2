@@ -153,165 +153,164 @@ bool playermove(vector<string>& log, int& playersum, string& playercards, int ba
 
 } //end of player move function
 
+void dealermove(vector<string>& log, int& dealersum, string& dealercards, int balance[][2], bool& dealerBust, int const BET, int const session) {
+
+    int dealercard;
+    bool dealerflag = true;
+    string str;
+    cout << "Now dealer is opening her second card..." << endl;
+    log.push_back("Now dealer is opening her second card...");
+
+    do {
+        dealercard = 1 + (rand() % 13);//generating different values using rand ranging from 0to13
+
+       if (dealercard >= 11 && dealercard <= 13) //dealer got face card. make it 10
+            dealercard = 10;
+
+       if (dealercard == 1 && ((dealersum + 11) <= 21)) //dealer will treat 1 as 11 only when is less than 21
+            dealercard = 11;
+
+        dealersum += dealercard;
+        dealercards = dealercards + ", " + to_string(dealercard);
+        cout << "Dealer cards are " << dealercards << endl;
+        cout << "Dealer total is : " << dealersum << endl;
+        str = "Dealer cards are " + dealercards+"\n \n";
+        log.push_back(str);
+        str = "Dealer total is : " + dealersum + '\n';
+        log.push_back(str);
+
+        if (dealersum > 21){ 
+            dealerflag = false;
+            dealerBust = true;
+        }
+
+        else if ((dealersum >= 17) && (dealersum <= 21)) { //dealer has to stand                             
+            cout << "Dealer total is 17 or more. Hence dealer will have to stand" << endl;
+            log.push_back("Dealer total is 17 or more. Hence dealer will have to stand \n \n");
+            dealerflag = false;
+        }
+
+        else if (dealersum == 21) {
+            cout << "Dealer got blackjack!" << endl;
+        }
+
+        else {
+            cout << "Dealer total is 16 or less. Hence dealer will have to hit" << endl;  //must for dealer to take out new card
+            log.push_back("Dealer total is 16 or less. Hence dealer will have to hit \n \n");
+        }
+    } while (dealerflag);
+
+}
+
+void gameresult(vector<string>& log, int playersum, int dealersum,int balance[][2],int session, int BET, bool dealerBust) {
+    string str;
+    if (dealerBust) {
+        cout << "dealer busted out, you WON!" << endl;
+        log.push_back("dealer busted out, you WON! \n");
+        balance[session][0] += BET;
+        balance[session][1] -= BET;
+
+        cout << "Dealer lost her " << BET << " dollar bet to you" << endl;
+        str = "Dealer lost her " + to_string(BET) + " dollar bet to you \n";
+        log.push_back(str);
+        cout << "Your new balance is : $" << balance[session][0] << endl;
+        str = "Your new balance is : $" + to_string(balance[session][0])+ '\n';
+        log.push_back(str);
+    }
+
+    else if (dealersum > playersum) {
+        cout << "Dealer Won!. Your " << BET << " $ bet went to the dealer" << endl;
+        str = "Dealer Won!. Your " + to_string(BET) + " $ bet went to the dealer \n";
+        log.push_back(str);
+        balance[session][0] -= BET;
+        balance[session][1] += BET;
+        cout << "Your new balance is : $" << balance[session][0] << endl;
+        str = "Your new balance is : $" + to_string(balance[session][0]) + '\n';
+        log.push_back(str);
+    }
+    else if (playersum > dealersum) {
+        cout << "You Won" << endl;
+        cout << "Dealer paid you $" << BET << endl;
+        //  bjfile<<"You Won"<<endl;//writing log to file
+        //  bjfile<<"Dealer paid you $"<<BET<<endl;//writing log to file
+        balance[session][0] += BET;
+        balance[session][1] -= BET;
+        cout << "Your new balance is : $" << balance[session][0] << endl;
+        // bjfile<<"Your new balance is : $"<<balance<<endl;//writing log to file
+
+    }
+    else if (playersum == 21 && dealersum == 21)
+    {
+        cout << "Both dealer and you got blackjacks. Hence it is draw. Your bet is returned" << endl;
+    }
+    else {
+        cout << "Your total is equal to that of dealer's. Game draws. You get your bet back" << endl << endl;
+        // bjfile<<"Your total is equal to that of builder's. Game draws. You get your bet back"<<endl<<endl;//writing log to file
+
+    }
+}
+
+bool newgame(int pbalance) {
+    char response;
+    std::cout << "--------------------------------------" << endl;
+    std::cout << "Do you want to continue playing? yes(y)/No(n)" << endl;
+    std::cin >> response;
+    if (response == 'n' || response == 'n') {
+        cout << "Thanks for playing Suhaani's blackjack" << endl;
+        cout << "Your current balance is " << pbalance << " dollars" << endl;
+        cout << "Return counters and take your money back" << endl;
+        cout << "--------------------------------------------";
+        return false;
+    }
+    else
+        return true;
+}
+
 int main() {
     //variables definition
+    int const ROWMAX = 100; //assume player will play maximum 100 sessions in the play
+
     bool gameloop = true;
-    bool gameinnerloop = true;
     bool dealerflag = true;
     bool playerBust = false;
     bool gamemasterloop = true;
     bool dealerBust = false;
-    char response;
-    
-    int newcard;
+    bool playmore = true;
+
     int playersum = 0;
     int dealersum = 0;
     int BET = 1;
-    int dealercard;
- 
+    int session = 1;
+
     string playercards;
     string dealercards;
     string playername;
-    ofstream bjfile;
-
-    int const ROWMAX = 100; //assume player will play maximum 100 sessions in the play
 
     vector <string> log;
     int balance[ROWMAX][2] = { {} }; //array to save current balance points. 
-    int session = 1;
-    //open a txt file to write the session log as it is important to write log in casino
 
     gameintro(log, balance[session][0], playername);
     gamebegin(log, playersum, dealersum, playercards, dealercards);
     
     while (gamemasterloop) {
-        while (gameinnerloop) { //execute player has no blackjack. loop for player to takeout more cards untill stand, burst or blackjack
-            
-          
-
-        }//end of innergameloop
-
-        //dealer will draw more card for herself....
-
-        if (!playerBust) {//execute when player has not busted
-            cout << "Now dealer is opening her second card..." << endl;
-            //bjfile<<"Now dealer is opening her second card..."<<endl;//writing log to file
-
-            do {
-                dealercard = 1 + (rand() % 13);//generating different values using rand ranging from 0to13
-
-                if (dealercard >= 11 && dealercard <= 13) //dealer got face card. make it 10
-                    dealercard = 10;
-
-                if (dealercard == 1 && ((dealersum + 11) <= 21)) //dealer will treat 1 as 11 only when is less than 21
-                    dealercard = 11;
-
-                dealersum += dealercard;
-                dealercards = dealercards + ", " + to_string(dealercard);
-                cout << "Dealer cards are " << dealercards << endl;
-                cout << "Dealer total is : " << dealersum << endl;
-                //bjfile<<"Dealer cards are "<<dealercards<<endl;//writing log to file
-                 //bjfile<<"Dealer total is : "<<dealersum<<endl;//writing log to file
-
-                if (dealersum > 21) { //dealer busted out
-                    //cout << "Dealer bursted out... Hence you won the game" << endl;
-                    //cout << "Dealer paid you $" << BET << endl;
-                    //  bjfile<<"Dealer bursted out... Hence you won the game"<<endl;//writing log to file
-                    //  bjfile<<"Dealer paid you $"<<BET<<endl;//writing log to file
-                    //balance[session] += BET;
-                    //cout << "Your new balance is : $" << balance << endl;
-                    //   bjfile<<"Your new balance is : $"<<balance<<endl;//writing log to file
-                    dealerflag = false;
-                    dealerBust = true;
-
-                }
-                else if ((dealersum >= 17) && (dealersum <= 21)) { //dealer has to stand                             
-                    cout << "Dealer total is 17 or more. Hence dealer will have to stand" << endl;
-                    //    bjfile<<"Dealer total is 17 or more. Hence dealer will have to stand"<<endl;//writing log to file
-                    dealerflag = false;
-                }
-
-                else if (dealersum == 21 && playersum != 21) {
-                    cout << "Dealer got blackjack!" << endl;
-                    // bjfile<<"Dealer got blackjack!"<<endl;//writing log to file
-                    //balance = balance - BET;
-                    //cout << "Your new balance is : $" << balance << endl;
-                    //cout << "Your new balance is : $" << balance << endl;//writing to log file
-                    //dealerflag = false;      
-                }
-
-                else {
-                    cout << "Dealer total is 16 or less. Hence dealer will have to hit" << endl;  //must for dealer to take out new card
-                 //   bjfile<<"Dealer total is 16 or less. Hence dealer will have to hit"<<endl;  //writing log to file
-                }
-            } while (dealerflag);
-
-            if (dealerBust) {
-                cout << "dealer busted out, you WON!" << endl;
-                balance[session][0] += BET;
-                balance[session][1] -= BET;
-
-                cout << "Dealer lost her " << BET << " dollar bet to you" << endl;
-                cout << "Your new balance is : $" << balance[session][0] << endl;
+        while (gameloop) { //execute player has no blackjack. loop for player to takeout more cards untill stand, burst or blackjack
+            gameloop=playermove(log, playersum, playercards, balance, playerBust, BET, session);
             }
-
-            else if (dealersum > playersum) {
-                cout << "Dealer Won!. Your " << BET << " $ bet went to the dealer" << endl;
-                // bjfile<<"Dealer Won!. Your "<<BET<<" $ bet went to the dealer"<<endl;//writing log to file
-                balance[session][0] -= BET;
-                balance[session][1] += BET;
-                cout << "Your new balance is : $" << balance[session][0] << endl;
-                // bjfile<<"Your new balance is : $"<<balance<<endl;//writing log to file
-            }
-            else if (playersum > dealersum) {
-                cout << "You Won" << endl;
-                cout << "Dealer paid you $" << BET << endl;
-                //  bjfile<<"You Won"<<endl;//writing log to file
-                //  bjfile<<"Dealer paid you $"<<BET<<endl;//writing log to file
-                balance[session][0] += BET;
-                balance[session][1] -= BET;
-
-                cout << "Your new balance is : $" << balance[session][0] << endl;
-                // bjfile<<"Your new balance is : $"<<balance<<endl;//writing log to file
-
-            }
-            else if (playersum == 21 && dealersum == 21)
-            {
-                cout << "Both dealer and you got blackjacks. Hence it is draw. Your bet is returned" << endl;
-            }
-            else {
-                cout << "Your total is equal to that of dealer's. Game draws. You get your bet back" << endl << endl;
-                // bjfile<<"Your total is equal to that of builder's. Game draws. You get your bet back"<<endl<<endl;//writing log to file
-
-            }
-
-        } //end of if
-
-
-        std::cout << "--------------------------------------" << endl;
-        std::cout << "Do you want to continue playing? yes(y)/No (n)" << endl;
-        std::cin >> response;
-
-        if (response == 'n' || response == 'n') {
-            cout << "Thanks for playing Suhaani's blackjack" << endl;
-            cout << "Your current balance is " << balance[session][0] << " dollars" << endl;
-            cout << "Return counters and take your money back" << endl;
-            cout << "--------------------------------------------";
-            gamemasterloop = false;
-        }//end of if
-        else {
+        if (!playerBust) {
+            dealermove(log, dealersum, dealercards, balance, dealerBust, BET, session);
+        }
+        gameresult(log, playersum, dealersum, balance, session, BET, dealerBust);
+        playmore=newgame(balance[session][0]);
+        if (!playmore){
             playersum = 0;
             dealersum = 0;
             dealerflag = true;
             gameloop = true;
-            gameinnerloop = true;
             playerBust = false;
             dealerBust = false;
             session++;
         }
 
-    }// end of mastergameloop
-
-    bjfile.close();
+    }
     return 0;
-}//end of main
+}
